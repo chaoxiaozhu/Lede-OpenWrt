@@ -1,0 +1,33 @@
+LuCI ---> Applications ---> luci-app-adguardhome  #AdGuard home广告过滤
+#
+LuCI ---> Applications ---> luci-app-arpbind  #IP/MAC绑定
+#
+LuCI ---> Applications ---> luci-app-autoreboot  #支持计划重启
+#
+LuCI ---> Applications ---> luci-app-ddns  #动态域名 DNS（集成阿里DDNS客户端）
+#
+LuCI ---> Applications ---> luci-app-filetransfer  #文件传输（可web安装ipk包）
+#
+LuCI ---> Applications ---> luci-app-firewall   #添加防火墙
+#
+LuCI ---> Applications ---> luci-app-nlbwmon   #网络带宽监视器
+#
+LuCI ---> Applications ---> passwall  #出国软件
+#
+LuCI ---> Applications ---> luci-app-ramfree  #释放内存
+#
+LuCI ---> Applications ---> luci-app-sfe  #Turbo ACC网络加速（集成FLOW,BBR,NAT,DNS)
+#
+LuCI ---> Applications ---> luci-app-ttyd   #网页终端命令行
+#
+LuCI ---> Applications ---> luci-app-frpc   #内网穿透Frp客户端
+#
+编译固件时候选择【GZip images】后，img格式文件就会成为.img.gz的压缩文件
+#
+支持 iPv6：
+Extra packages  --->  ipv6helper
+#
+编译丰富插件时，建议修改下面两项默认大小，留足插件空间。（ x86/64 ）！！！
+Target Images ---> (16) Kernel partition size (in MB)                        #默认是 (16) 建议修改 (256)
+Target Images ---> (160) Root filesystem partition size (in MB)         #默认是 (160) 建议修改 (512)
+#
