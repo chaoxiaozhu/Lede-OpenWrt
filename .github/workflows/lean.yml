@@ -15,7 +15,7 @@
 #    - cron: 30 8 1-10 * *      这样表示每个月1至10号的每天编译一次，编译时间为utc时间8点30分开始（中国时间16：30）
 
 
-name: 编译 Lean
+name: 编译 lean
 
 on:
   repository_dispatch:
@@ -171,15 +171,15 @@ jobs:
         name: OpenWrt_${{matrix.target}}${{ env.DEVICE_NAME }}_${{ env.date }}
         path: ${{ env.FIRMWARE }}
 
-    - name: 上传固件到「奶牛快传」和「WeTransfer」
+    - name: 上传固件到「WeTransfer」和「奶牛快传」
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
-        ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
-        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
-        curl -fsSL git.io/file-transfer | sh
         ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
         echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
+        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
 
     - name: 删除上传在GitHub空间的老固件
       uses: c-hive/gha-remove-artifacts@v1.2.0
