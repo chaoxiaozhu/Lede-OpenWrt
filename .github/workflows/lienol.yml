@@ -14,7 +14,6 @@
 #    - cron: 30 8 5,15,25 * *     表示每个月按你指定日期编译，现设的是5号-15号-25号编译，可设N天，编译时间为utc时间8点30分开始（中国时间16：30）
 #    - cron: 30 8 1-10 * *      这样表示每个月1至10号的每天编译一次，编译时间为utc时间8点30分开始（中国时间16：30）
 
-
 name: 编译 lienol
 
 on:
@@ -161,7 +160,7 @@ jobs:
       uses: actions/upload-artifact@v2
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_CONFIG == 'true'
       with:
-        name: .config_${{matrix.target}}${{ env.DEVICE_NAME }}_${{ env.date }}
+        name: config_${{matrix.target}}${{ env.DEVICE_NAME }}_${{ env.date }}
         path: ./config
 
     - name: 上传固件到GitHub空间
@@ -171,17 +170,17 @@ jobs:
         name: OpenWrt_${{matrix.target}}${{ env.DEVICE_NAME }}_${{ env.date }}
         path: ${{ env.FIRMWARE }}
 
-    - name: 上传固件到「奶牛快传」和「WeTransfer」
+    - name: 上传固件到「WeTransfer」和「奶牛快传」
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
-        ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
-        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
-        curl -fsSL git.io/file-transfer | sh
         ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
         echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
+        curl -fsSL git.io/file-transfer | sh
+        ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
+        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
 
-    - name: 删除上传在GitHub空间的老固件
+    - name: 删除上传在GitHub空间的旧固件
       uses: c-hive/gha-remove-artifacts@v1.2.0
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true'
       with:
