@@ -28,6 +28,7 @@ sed -i 's@.*CYXluq4wUazHjmCDBCqXF*@#&@g' package/lean/default-settings/files/zzz
 sed -i 's/"带宽监控"/"监视"/g' feeds/luci/applications/luci-app-nlbwmon/po/zh-cn/nlbwmon.po
 sed -i 's/"Turbo ACC 网络加速"/"网络加速"/g' package/lean/luci-app-sfe/po/zh-cn/sfe.po
 sed -i 's/"TTYD 终端"/"TTYD"/g' package/lean/luci-app-ttyd/po/zh-cn/terminal.po
+sed -i 's/"TTYD 终端"/"TTYD"/g' package/liuran001/luci-app-ttyd/po/zh-cn/terminal.po
 
 #sed -i 's/"Turbo ACC 网络加速"/"网络加速"/g' package/lean/luci-app-flowoffload/po/zh-cn/flowoffload.po
 #sed -i 's/"网络存储"/"存储"/g' package/lean/luci-app-amule/po/zh-cn/amule.po
