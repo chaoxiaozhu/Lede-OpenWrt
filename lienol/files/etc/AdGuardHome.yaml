@@ -155,4 +155,3 @@ log_max_age: 3
 log_file: ""
 verbose: false
 schema_version: 7
-1
