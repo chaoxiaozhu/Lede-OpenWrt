@@ -2,6 +2,8 @@
 # Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
 #
 
+rm -rf package/lean/luci-app-ttyd
+
 # 修改openwrt登陆地址,把下面的192.168.10.1修改成你想要的就可以了，其它不要动
 sed -i 's/192.168.1.1/192.168.10.1/g' package/base-files/files/bin/config_generate
 
@@ -26,8 +28,8 @@ sed -i 's@.*CYXluq4wUazHjmCDBCqXF*@#&@g' package/lean/default-settings/files/zzz
 
 # 修改插件名字（修改名字后不知道会不会对插件功能有影响，自己多测试）
 sed -i 's/"带宽监控"/"监视"/g' feeds/luci/applications/luci-app-nlbwmon/po/zh-cn/nlbwmon.po
-sed -i 's/"TTYD 终端"/"TTYD"/g' package/lean/luci-app-ttyd/po/zh-cn/terminal.po
-#sed -i 's/"TTYD 终端"/"TTYD"/g' package/liuran001/luci-app-ttyd/po/zh-cn/terminal.po
+#sed -i 's/"TTYD 终端"/"TTYD"/g' package/lean/luci-app-ttyd/po/zh-cn/terminal.po
+sed -i 's/"TTYD 终端"/"TTYD"/g' package/liuran001/luci-app-ttyd/po/zh-cn/terminal.po
 sed -i 's/"Turbo ACC 网络加速"/"网络加速"/g' package/lean/luci-app-sfe/po/zh-cn/sfe.po
 sed -i 's/"Turbo ACC 网络加速"/"网络加速"/g' package/lean/luci-app-flowoffload/po/zh-cn/flowoffload.po
 
