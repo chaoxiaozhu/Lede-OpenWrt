@@ -113,14 +113,8 @@ filters:
   url: http://sub.adtchrome.com/adt-chinalist-easylist.txt
   name: ChinaList+EasyList(修正)
 - enabled: true
-  url: https://easylist-downloads.adblockplus.org/abp-filters-anti-cv.txt
-  name: ABP filters
-- enabled: true
   url: https://banbendalao.coding.net/p/adgk/d/ADgk/git/raw/master/ADgk.txt
   name: adgk手机去广告规则
-- enabled: false
-  url: https://adaway.org/hosts.txt
-  name: AdAway HOST
 whitelist_filters: []
 user_rules:
 - '@@||taobao.com^$important'
