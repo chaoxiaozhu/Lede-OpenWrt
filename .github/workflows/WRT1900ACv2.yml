@@ -5,7 +5,6 @@
 # <https://github.com/P3TERX/Actions-OpenWrt.git>
 #
 
-
 # 定时触发开始编译（UTC时间）（5组数为 分-时-日-月-周，简单说明符号《*每》《/隔》《,分别》《-至》）
 #  schedule:
 #    - cron: 30 8 * * *       表示每天编译一次，编译时间为utc时间8点30分开始（中国时间16：30）
@@ -14,7 +13,7 @@
 #    - cron: 30 8 5,15,25 * *     表示每个月按你指定日期编译，现设的是5号-15号-25号编译，可设N天，编译时间为utc时间8点30分开始（中国时间16：30）
 #    - cron: 30 8 1-10 * *      这样表示每个月1至10号的每天编译一次，编译时间为utc时间8点30分开始（中国时间16：30）
 
-name: 编译 lienol
+name: lienol [WRT1900ACv2]
 
 on:
   repository_dispatch:
@@ -30,7 +29,7 @@ jobs:
     runs-on: ubuntu-22.04
     if: github.event.repository.owner.id == github.event.sender.id
 
-    name: 编译 ${{matrix.target}}
+    name: ${{matrix.target}} [WRT1900ACv2]
     strategy:
       fail-fast: false
       matrix:
@@ -38,7 +37,7 @@ jobs:
 
     steps:
     - name: 准备结束
-      uses: actions/checkout@v3
+      uses: actions/checkout@main
 
     - name: 检测脚本设置
       run: |
@@ -46,8 +45,7 @@ jobs:
         echo "REPO_URL=${REPO_URL}" >> $GITHUB_ENV
         echo "REPO_BRANCH=${REPO_BRANCH}" >> $GITHUB_ENV
         echo "CONFIG_FILE=${CONFIG_FILE}" >> $GITHUB_ENV
-        echo "DIY_P1_SH=${DIY_P1_SH}" >> $GITHUB_ENV
-        echo "DIY_P2_SH=${DIY_P2_SH}" >> $GITHUB_ENV
+        echo "DIY_SH=${DIY_SH}" >> $GITHUB_ENV
         echo "UPLOAD_CONFIG=${UPLOAD_CONFIG}" >> $GITHUB_ENV
         echo "UPLOAD_FIRMWARE=${UPLOAD_FIRMWARE}" >> $GITHUB_ENV
         echo "UPLOAD_WETRANSFER=${UPLOAD_WETRANSFER}" >> $GITHUB_ENV
@@ -66,26 +64,20 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
 
-    - name: 克隆${{matrix.target}}源代码
+    - name: 克隆源代码
       working-directory: /workdir
       run: |
         df -hT $PWD
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
-    - name: 安装${{matrix.target}}组件和自定义设置
+    - name: 安装组件和自定义设置
       run: |
         cp -Rf `find ./ -maxdepth 1 -type d ! -path './openwrt' ! -path './'` openwrt
         cd openwrt
         if [ -n "$(ls -A "${{matrix.target}}/patches" 2>/dev/null)" ]; then
         (
           find "${{matrix.target}}/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d './' -p0 --forward" || true
-        )
-        fi
-        if [ -f "${{matrix.target}}/$DIY_P1_SH" ]; then
-        (
-          chmod +x ${{matrix.target}}/$DIY_P1_SH
-          /bin/bash "${{matrix.target}}/$DIY_P1_SH"
         )
         fi
         ./scripts/feeds clean
@@ -97,16 +89,16 @@ jobs:
         if [ -n "$(ls -A "${{matrix.target}}/diy" 2>/dev/null)" ]; then
          cp -Rf ${{matrix.target}}/diy/* ./
         fi        
-        if [ -f "${{matrix.target}}/$DIY_P2_SH" ]; then
+        if [ -f "${{matrix.target}}/$DIY_SH" ]; then
         (
-          chmod +x ${{matrix.target}}/$DIY_P2_SH
-          /bin/bash "${{matrix.target}}/$DIY_P2_SH"
+          chmod +x ${{matrix.target}}/$DIY_SH
+          /bin/bash "${{matrix.target}}/$DIY_SH"
         )
         fi
          mv ${{matrix.target}}/$CONFIG_FILE .config
         make defconfig
 
-    - name: 下载DL库文件包
+    - name: 下载DL文件
       id: package
       run: |
         cd openwrt
