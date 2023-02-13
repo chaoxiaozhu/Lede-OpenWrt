@@ -2,8 +2,25 @@
 # Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
 #
 
-# 删除源码自带插件
-rm -rf package/diy/luci-app-adguardhome
+# 添加组件
+git clone https://github.com/chaoxiaozhu/chao package/chao
+
+# 删除组件
+rm -rf feeds/luci/applications/luci-app-ttyd
+rm -rf feeds/luci/applications/luci-app-nlbwmon
+rm -rf feeds/lienol/luci-app-fileassistant
+rm -rf feeds/luci/applications/luci-app-advanced-reboot
+rm -rf feeds/luci/collections/luci/Makefile
+
+# 复制组件
+mv package/chao/luci-app-ttyd feeds/luci/applications
+mv package/chao/luci-app-nlbwmon feeds/luci/applications
+mv package/chao/luci-app-advanced-reboot feeds/luci/applications
+mv package/chao/luci-app-fileassistant feeds/lienol
+mv package/chao/Makefile feeds/luci/collections/luci
+
+# 空密码
+# sed -i 's/$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.//g' package/default-settings/files/zzz-default-settings
 
 # 修改openwrt登陆地址,把下面的192.168.10.1修改成你想要的就可以了，其它不要动
 sed -i 's/192.168.1.1/192.168.10.1/g' package/base-files/files/bin/config_generate
@@ -19,12 +36,10 @@ sed -i 's/192.168.1.1/192.168.10.1/g' package/base-files/files/bin/config_genera
 #sed -i 's/KERNEL_TESTING_PATCHVER:=5.4/KERNEL_TESTING_PATCHVER:=4.19/g' ./target/linux/x86/Makefile
 
 # 修改插件名字（修改名字后不知道会不会对插件功能有影响，自己多测试）
-sed -i 's/"带宽监控"/"监控"/g' feeds/luci/applications/luci-app-nlbwmon/po/zh-cn/nlbwmon.po
-sed -i 's/"TTYD 终端"/"TTYD"/g' package/lean/luci-app-ttyd/po/zh-cn/terminal.po
-sed -i 's/"Turbo ACC 网络加速"/"网络加速"/g' package/lean/luci-app-sfe/po/zh-cn/sfe.po
-sed -i 's/"Turbo ACC 网络加速"/"网络加速"/g' package/lean/luci-app-flowoffload/po/zh-cn/flowoffload.po
+#sed -i 's/"TTYD 终端"/"TTYD"/g' feeds/luci/transplant/luci-app-ttyd/po/zh-cn/terminal.po
+#sed -i 's/"带宽监控"/"监控"/g' feeds/luci/applications/luci-app-nlbwmon/po/zh-cn/nlbwmon.po
+sed -i 's/"Turbo ACC 网络加速"/"网络加速"/g' feeds/other/lean/luci-app-turboacc/po/zh-cn/turboacc.po
 
-#sed -i 's/"Turbo ACC 网络加速"/"网络加速"/g' package/lean/luci-app-flowoffload/po/zh-cn/flowoffload.po
 #sed -i 's/"网络存储"/"存储"/g' package/lean/luci-app-amule/po/zh-cn/amule.po
 #sed -i 's/"网络存储"/"存储"/g' package/lean/luci-app-vsftpd/po/zh-cn/vsftpd.po
 #sed -i 's/"网络存储"/"存储"/g' package/lean/luci-app-usb-printer/po/zh-cn/usb-printer.po
