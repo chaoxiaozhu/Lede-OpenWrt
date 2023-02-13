@@ -32,6 +32,8 @@ jobs:
     name: x86_64
     strategy:
       fail-fast: false
+      matrix:
+        target: [lienol]
 
     steps:
     - name: 准备结束
