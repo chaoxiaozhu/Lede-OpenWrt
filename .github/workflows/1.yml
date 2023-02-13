@@ -13,7 +13,7 @@
 #    - cron: 30 8 5,15,25 * *     表示每个月按你指定日期编译，现设的是5号-15号-25号编译，可设N天，编译时间为utc时间8点30分开始（中国时间16：30）
 #    - cron: 30 8 1-10 * *      这样表示每个月1至10号的每天编译一次，编译时间为utc时间8点30分开始（中国时间16：30）
 
-name: 编译 ${{matrix.target}}
+name: 编译 x86_64
 
 on:
   repository_dispatch:
@@ -29,11 +29,11 @@ jobs:
     runs-on: ubuntu-22.04
     if: github.event.repository.owner.id == github.event.sender.id
 
-    name: ${{matrix.target}}
+    name: ${{matrix.target}} x86_64
     strategy:
       fail-fast: false
       matrix:
-        target: [x86_64]
+        target: [lienol]
 
     steps:
     - name: 准备结束
