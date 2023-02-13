@@ -38,7 +38,7 @@ jobs:
 
     steps:
     - name: 准备结束
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: 检测脚本设置
       run: |
@@ -52,7 +52,7 @@ jobs:
         echo "UPLOAD_FIRMWARE=${UPLOAD_FIRMWARE}" >> $GITHUB_ENV
         echo "UPLOAD_COWTRANSFER=${UPLOAD_COWTRANSFER}" >> $GITHUB_ENV
 
-    - name: 安装编译所需系统
+    - name: 初始化环境
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
@@ -65,14 +65,14 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
 
-    - name: 下载${{matrix.target}}源码
+    - name: 克隆${{matrix.target}}源代码
       working-directory: /workdir
       run: |
         df -hT $PWD
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
 
-    - name: 加载${{matrix.target}}源码和自定义设置
+    - name: 加载${{matrix.target}}组件和自定义设置
       run: |
         cp -Rf `find ./ -maxdepth 1 -type d ! -path './openwrt' ! -path './'` openwrt
         cd openwrt
@@ -105,7 +105,7 @@ jobs:
          mv ${{matrix.target}}/$CONFIG_FILE .config
         make defconfig
 
-    - name: 下载DL库软件包
+    - name: 下载DL库文件包
       id: package
       run: |
         cd openwrt
@@ -119,7 +119,7 @@ jobs:
         cd openwrt
         echo -e "$(($(nproc)+1)) thread compile"
         make -j$(($(nproc)+1)) || make -j1 V=s
-        echo "::set-output name=status::success"     
+        echo "status=success" >> $GITHUB_OUTPUT     
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV        
         echo "date=$(date "+%Y-%m-%d %H.%M")" >> $GITHUB_ENV
@@ -142,33 +142,30 @@ jobs:
         find -name "*vmlinuz*" | xargs -i mv -f {} packages
         rm -rf packages
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
-        echo "::set-output name=status::success"
+        echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 上传config配置文件到GitHub空间
-      uses: actions/upload-artifact@v2
+    - name: 上传config到GitHub
+      uses: actions/upload-artifact@v3
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_CONFIG == 'true'
       with:
         name: config_${{matrix.target}}${{ env.DEVICE_NAME }}_${{ env.date }}
         path: ./config
 
-    - name: 上传固件到GitHub空间
-      uses: actions/upload-artifact@v2
+    - name: 上传固件GitHub
+      uses: actions/upload-artifact@v3
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true'
       with:
         name: OpenWrt_${{matrix.target}}${{ env.DEVICE_NAME }}_${{ env.date }}
         path: ${{ env.FIRMWARE }}
 
-    - name: 上传固件到「WeTransfer」和「奶牛快传」
+    - name: 上传固件WeTransfer
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
       run: |
         curl -fsSL git.io/file-transfer | sh
         ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
         echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
-        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
 
-    - name: 删除上传在GitHub空间的旧固件
+    - name: 删除GitHub旧固件
       uses: c-hive/gha-remove-artifacts@v1.2.0
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true'
       with:
