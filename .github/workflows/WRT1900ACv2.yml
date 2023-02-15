@@ -1,6 +1,6 @@
 #
 # 感谢p3terx大神的一键编译脚本
-# 
+#
 # Copyright (C) 2019 P3TERX <https://p3terx.com>
 # <https://github.com/P3TERX/Actions-OpenWrt.git>
 #
@@ -41,7 +41,7 @@ jobs:
 
     - name: 检测脚本设置
       run: |
-        source "${GITHUB_WORKSPACE}/${{matrix.target}}/scripts/wrt1900acv2.ini"
+        source "${GITHUB_WORKSPACE}/${{matrix.target}}/setups/wrt1900acv2.ini"
         echo "REPO_URL=${REPO_URL}" >> $GITHUB_ENV
         echo "REPO_BRANCH=${REPO_BRANCH}" >> $GITHUB_ENV
         echo "CONFIG_FILE=${CONFIG_FILE}" >> $GITHUB_ENV
@@ -64,7 +64,7 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
 
-    - name: 克隆源代码
+    - name: 下载源代码
       working-directory: /workdir
       run: |
         df -hT $PWD
@@ -88,7 +88,7 @@ jobs:
         fi
         if [ -n "$(ls -A "${{matrix.target}}/diy" 2>/dev/null)" ]; then
          cp -Rf ${{matrix.target}}/diy/* ./
-        fi        
+        fi
         if [ -f "${{matrix.target}}/$DIY_SH" ]; then
         (
           chmod +x ${{matrix.target}}/$DIY_SH
@@ -112,16 +112,12 @@ jobs:
         cd openwrt
         echo -e "$(($(nproc)+1)) thread compile"
         make -j$(($(nproc)+1)) || make -j1 V=s
-        echo "status=success" >> $GITHUB_OUTPUT     
+        echo "status=success" >> $GITHUB_OUTPUT
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
-        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV        
-        echo "date=$(date "+%Y-%m-%d %H.%M")" >> $GITHUB_ENV
-        echo "date1=$(date "+%Y年%m月%d号-%H点%M分")" >> $GITHUB_ENV
-        echo "date2=$(date "+%Y%m%d-%H%M")" >> $GITHUB_ENV
-
-    - name: 检查空间使用情况
-      if: (!cancelled())
-      run: df -hT
+        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
+        echo "date=$(date "+%Y-%m-%d")" >> $GITHUB_ENV
+        echo "date1=$(date "+%Y年%m月%d号")" >> $GITHUB_ENV
+        echo "date2=$(date "+%Y%m%d")" >> $GITHUB_ENV
 
     - name: 整理文件
       id: organizer
@@ -141,18 +137,18 @@ jobs:
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 上传config到GitHub
-      uses: actions/upload-artifact@v3
+    - name: 上传config
+      uses: actions/upload-artifact@main
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_CONFIG == 'true'
       with:
-        name: config_${{matrix.target}}${{ env.DEVICE_NAME }}_${{ env.date }}
+        name: config_${{ env.date }}
         path: ./config
 
     - name: 上传固件GitHub
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@main
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true'
       with:
-        name: OpenWrt_${{matrix.target}}${{ env.DEVICE_NAME }}_${{ env.date }}
+        name: OpenWrt_${{ env.date }}
         path: ${{ env.FIRMWARE }}
 
     - name: 上传固件WeTransfer
@@ -167,7 +163,7 @@ jobs:
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
-        echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
+        echo "release_tag=${{ env.date }}" >> $GITHUB_OUTPUT
         touch release.txt
         [ $UPLOAD_WETRANSFER = true ] && echo "🔗 [WeTransfer](${{ steps.wetransfer.outputs.url }})" >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
@@ -189,7 +185,7 @@ jobs:
         keep_minimum_runs: 0
 
     - name: 删除旧固件
-      uses: c-hive/gha-remove-artifacts@v1.2.0
+      uses: dev-drprasad/delete-older-releases@master
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true'
       with:
         age: '1 day'
