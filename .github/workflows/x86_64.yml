@@ -64,7 +64,7 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
 
-    - name: 克隆源代码
+    - name: 下载源代码
       working-directory: /workdir
       run: |
         df -hT $PWD
@@ -115,9 +115,9 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT     
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV        
-        echo "date=$(date "+%Y-%m-%d %H.%M")" >> $GITHUB_ENV
-        echo "date1=$(date "+%Y年%m月%d号-%H点%M分")" >> $GITHUB_ENV
-        echo "date2=$(date "+%Y%m%d-%H%M")" >> $GITHUB_ENV
+        echo "date=$(date "+%y-%M-%d")" >> $GITHUB_ENV
+        echo "date1=$(date "+%y年%M月%d号")" >> $GITHUB_ENV
+        echo "date2=$(date "+%y%M%d")" >> $GITHUB_ENV
 
     - name: 检查空间使用情况
       if: (!cancelled())
@@ -141,18 +141,18 @@ jobs:
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: 上传config到GitHub
+    - name: 上传config
       uses: actions/upload-artifact@v3
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_CONFIG == 'true'
       with:
-        name: config_${{matrix.target}}${{ env.DEVICE_NAME }}_${{ env.date }}
+        name: config_${{ env.date }}
         path: ./config
 
     - name: 上传固件GitHub
       uses: actions/upload-artifact@v3
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true'
       with:
-        name: OpenWrt_${{matrix.target}}${{ env.DEVICE_NAME }}_${{ env.date }}
+        name: OpenWrt_${{ env.date }}
         path: ${{ env.FIRMWARE }}
 
     - name: 上传固件WeTransfer
@@ -167,7 +167,7 @@ jobs:
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
-        echo "release_tag=$(date +"%Y.%m.%d-%H%M")" >> $GITHUB_OUTPUT
+        echo "release_tag=$(date +%y-%M-%d")" >> $GITHUB_OUTPUT
         touch release.txt
         [ $UPLOAD_WETRANSFER = true ] && echo "🔗 [WeTransfer](${{ steps.wetransfer.outputs.url }})" >> release.txt
         echo "status=success" >> $GITHUB_OUTPUT
