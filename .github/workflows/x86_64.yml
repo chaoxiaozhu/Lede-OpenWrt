@@ -115,13 +115,9 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
-        echo "date=$(date "+%y-%M-%d")" >> $GITHUB_ENV
-        echo "date1=$(date "+%y年%M月%d号")" >> $GITHUB_ENV
-        echo "date2=$(date "+%y%M%d")" >> $GITHUB_ENV
-
-    - name: 检查空间使用情况
-      if: (!cancelled())
-      run: df -hT
+        echo "date=$(date "+%Y-%m-%d")" >> $GITHUB_ENV
+        echo "date1=$(date "+%Y年%m月%d号")" >> $GITHUB_ENV
+        echo "date2=$(date "+%Y%m%d")" >> $GITHUB_ENV
 
     - name: 整理文件
       id: organizer
@@ -142,14 +138,14 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 上传config
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@main
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_CONFIG == 'true'
       with:
         name: config_${{ env.date }}
         path: ./config
 
     - name: 上传固件GitHub
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@main
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true'
       with:
         name: OpenWrt_${{ env.date }}
@@ -189,7 +185,7 @@ jobs:
         keep_minimum_runs: 0
 
     - name: 删除旧固件
-      uses: c-hive/gha-remove-artifacts@v1.2.0
+      uses: dev-drprasad/delete-older-releases@master
       if: steps.organizer.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true'
       with:
         age: '1 day'
